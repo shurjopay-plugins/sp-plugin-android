@@ -134,7 +134,7 @@ class PaymentActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
 //        Log.d(TAG, "shouldOverrideUrlLoading: url = $url")
 
-                if (url.contains("cancel_url")) {
+                if (url.contains(data.cancelUrl.toString())) {
                     ShurjoPaySDK.listener?.onFailed(
                         ErrorSuccess(
                             ErrorSuccess.ESType.HTTP_ERROR,
@@ -144,7 +144,7 @@ class PaymentActivity : AppCompatActivity() {
                     )
                     finish()
                 }
-                if (url.contains("return_url") && url.contains("order_id")) {
+                if (url.contains(data.returnUrl.toString()) && url.contains("order_id")) {
                     verifyPayment()
                 }
                 return false

@@ -32,7 +32,7 @@ android {
     buildFeatures {
         viewBinding true
     }
-    namespace 'com.shurjopay.sdk.v2'
+    namespace "com.shurjopay.sdk.v2"
 }
 
 dependencies {

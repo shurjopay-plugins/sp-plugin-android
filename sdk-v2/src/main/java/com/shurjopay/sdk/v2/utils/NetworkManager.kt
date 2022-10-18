@@ -3,6 +3,7 @@ package com.shurjopay.sdk.v2.utils
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Debug
 import android.util.Log
 
 object NetworkManager {
@@ -15,7 +16,7 @@ object NetworkManager {
       if (capabilities != null) {
         when {
           capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-//            Log.i(TAG, "NetworkCapabilities.TRANSPORT_CELLULAR")
+           Log.i(TAG, "NetworkCapabilities.TRANSPORT_CELLULAR")
             return true
           }
           capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {

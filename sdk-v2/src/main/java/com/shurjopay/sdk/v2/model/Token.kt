@@ -1,6 +1,11 @@
 package com.shurjopay.sdk.v2.model
 
-
+/**
+ * Token data class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 data class Token(
     var username: String,
     var password: String,

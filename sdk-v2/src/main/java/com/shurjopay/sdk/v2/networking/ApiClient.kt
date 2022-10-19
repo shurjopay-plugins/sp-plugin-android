@@ -5,6 +5,12 @@ import com.shurjopay.sdk.v2.utils.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Api Client class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 class ApiClient {
   private var retrofit: Retrofit? = null
 

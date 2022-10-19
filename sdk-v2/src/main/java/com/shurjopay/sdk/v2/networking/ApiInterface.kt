@@ -9,6 +9,12 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
+/**
+ * Api Interface interface
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 interface ApiInterface {
 
   //////////////////// POST ///////////////////

@@ -6,6 +6,12 @@ import android.net.NetworkCapabilities
 import android.os.Debug
 import android.util.Log
 
+/**
+ * Network Manager object
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 object NetworkManager {
 
   fun isInternetAvailable(context: Context): Boolean {

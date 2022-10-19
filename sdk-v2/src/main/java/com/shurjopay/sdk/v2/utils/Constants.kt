@@ -2,6 +2,12 @@ package com.shurjopay.sdk.v2.utils
 
 import androidx.annotation.Keep
 
+/**
+ * Constants class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 @Keep class Constants {
   @Keep companion object {
     const val SDK_TYPE = "sdk-type"

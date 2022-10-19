@@ -7,6 +7,12 @@ import com.shurjopay.sdk.v2.model.RequiredData
 import com.shurjopay.sdk.v2.utils.Constants
 import com.shurjopay.sdk.v2.utils.NetworkManager.isInternetAvailable
 
+/**
+ * Shurjopay SDK class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 class ShurjoPaySDK private constructor() {
 
     fun makePayment(

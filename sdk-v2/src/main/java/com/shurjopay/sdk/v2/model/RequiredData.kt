@@ -3,6 +3,12 @@ package com.shurjopay.sdk.v2.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+/**
+ * Required Data data class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 @Parcelize
 data class RequiredData(
     var username: String,

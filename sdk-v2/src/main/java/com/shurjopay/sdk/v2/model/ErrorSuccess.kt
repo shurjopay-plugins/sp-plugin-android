@@ -1,5 +1,11 @@
 package com.shurjopay.sdk.v2.model
 
+/**
+ * Error Success class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 class ErrorSuccess(esType: ESType?, transactionInfo: TransactionInfo?, message: String?, debugMessage: String? = null) {
     var esType: ESType? = null
     var transactionInfo: TransactionInfo? = null

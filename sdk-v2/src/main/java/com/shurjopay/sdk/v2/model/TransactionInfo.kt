@@ -1,5 +1,11 @@
 package com.shurjopay.sdk.v2.model
 
+/**
+ * Transaction Info data class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 data class TransactionInfo(
     var id: Int?,
     var order_id: String,

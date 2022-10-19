@@ -17,6 +17,12 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/**
+ * Payment Activity class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 class PaymentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPaymentBinding

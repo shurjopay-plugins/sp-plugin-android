@@ -1,5 +1,11 @@
 package com.shurjopay.sdk.v2.model
 
+/**
+ * Checkout Request data class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 data class CheckoutRequest(
     var token: String,
     var store_id: Int,

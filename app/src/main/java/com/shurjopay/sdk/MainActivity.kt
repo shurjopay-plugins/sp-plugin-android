@@ -11,6 +11,12 @@ import com.shurjopay.sdk.v2.payment.ShurjoPaySDK
 import com.shurjopay.sdk.v2.utils.Constants
 import java.util.*
 
+/**
+ * Main Activity class
+ *
+ * @author  Rz Rasel
+ * @since   2021-08-07
+ */
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     private lateinit var binding: ActivityMainBinding

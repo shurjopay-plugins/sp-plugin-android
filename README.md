@@ -49,7 +49,7 @@ Add it in your root build.gradle at the end of repositories:
 ```gradel
 	dependencies {
 		...
-	        implementation 'com.github.filelucker:test-plugin:v1.1.6'     // TODO: Need too change this
+	        implementation 'com.github.filelucker:test-plugin:v1.1.6'     // TODO: Need to change this
 		...
 	}
   ```

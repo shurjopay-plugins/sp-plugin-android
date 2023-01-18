@@ -2,35 +2,42 @@ package com.shurjopay.sdk.v2.payment
 
 import android.app.ProgressDialog
 import android.net.http.SslError
+import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import com.shurjopay.sdk.v2.databinding.ActivityPaymentBinding
 import com.shurjopay.sdk.v2.model.*
 import com.shurjopay.sdk.v2.networking.ApiClient
 import com.shurjopay.sdk.v2.networking.ApiInterface
+import com.shurjopay.sdk.v2.utils.AppResourse
 import com.shurjopay.sdk.v2.utils.Constants
+import com.shurjopay.sdk.v2.utils.Constants.Companion.CONFIG_PASSWORD
+import com.shurjopay.sdk.v2.utils.Constants.Companion.CONFIG_SDK_TYPE
+import com.shurjopay.sdk.v2.utils.Constants.Companion.CONFIG_USERNAME
+import com.shurjopay.sdk.v2.utils.IndeterminateProgressDialog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * Payment Activity class
- *
- * @author  Rz Rasel
- * @since   2021-08-07
+ * Created by @author Moniruzzaman on 10/1/23. github: filelucker
  */
 class PaymentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPaymentBinding
 
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressDialog: IndeterminateProgressDialog
 
     private lateinit var sdkType: String
-    private lateinit var data: RequiredData
+    private lateinit var username: String
+    private lateinit var password: String
+    private lateinit var data: RequestData
     private var tokenResponse: Token? = null
     private var checkoutRequest: CheckoutRequest? = null
     private var checkoutResponse: CheckoutResponse? = null
@@ -40,19 +47,27 @@ class PaymentActivity : AppCompatActivity() {
         binding = ActivityPaymentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Please Wait...")
+        progressDialog = IndeterminateProgressDialog(this)
+        progressDialog.setMessage("Please wait...")
+        progressDialog.setCanceledOnTouchOutside(false)
         progressDialog.setCancelable(false)
 
-        sdkType = intent.getStringExtra(Constants.SDK_TYPE).toString()
-        data = intent.getParcelableExtra(Constants.DATA)!!
+        sdkType = AppResourse().getString(CONFIG_SDK_TYPE, this@PaymentActivity).trim()
+        username = AppResourse().getString(CONFIG_USERNAME, this@PaymentActivity).trim()
+        password = AppResourse().getString(CONFIG_PASSWORD, this@PaymentActivity).trim()
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            data = intent.getParcelableExtra(Constants.DATA, RequestData::class.java)!!
+        } else {
+            data = intent.getParcelableExtra(Constants.DATA)!!
+        }
         getToken()
     }
 
     private fun getToken() {
         showProgress()
         val token = Token(
-            data.username, data.password, null, null, null,
+            username, password, null, null, null,
             null, null, null, null
         )
 
@@ -60,6 +75,7 @@ class PaymentActivity : AppCompatActivity() {
             ?.enqueue(object : Callback<Token> {
                 override fun onResponse(call: Call<Token>, response: Response<Token>) {
                     if (response.isSuccessful) {
+                        hideProgress()
                         tokenResponse = response.body()
                         getExecuteUrl()
                     }
@@ -80,6 +96,7 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     private fun getExecuteUrl() {
+        showProgress()
         checkoutRequest = onExecuteUrlDataBuilder(tokenResponse, data)
         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.checkout(
             "Bearer " + tokenResponse?.token,
@@ -118,7 +135,7 @@ class PaymentActivity : AppCompatActivity() {
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
 //        Log.d(TAG, "shouldOverrideUrlLoading: url = $url")
-
+                binding.webView.setVisibility(View.GONE);
                 if (url.contains(data.cancelUrl.toString())) {
                     ShurjoPaySDK.listener?.onFailed(
                         ErrorSuccess(
@@ -145,7 +162,7 @@ class PaymentActivity : AppCompatActivity() {
         }
         binding.webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                binding.progressBar.progress = newProgress
+//                binding.progressBar.progress = newProgress
             }
         }
     }
@@ -201,7 +218,7 @@ class PaymentActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
+    override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {
         ShurjoPaySDK.listener?.onFailed(
             ErrorSuccess(
                 ErrorSuccess.ESType.HTTP_ERROR,
@@ -209,8 +226,9 @@ class PaymentActivity : AppCompatActivity() {
                 Constants.PAYMENT_CANCELLED_BY_USER,
             )
         )
-        super.onBackPressed()
+        return super.getOnBackInvokedDispatcher()
     }
+
 
     companion object {
         private const val TAG = "PaymentActivity"
@@ -218,12 +236,12 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun onExecuteUrlDataBuilder(
         tokenResponse: Token?,
-        data: RequiredData
+        data: RequestData
     ): CheckoutRequest {
         return CheckoutRequest(
             tokenResponse?.token.toString(),
             tokenResponse?.store_id!!,
-            data.prefix,
+            sdkType,
             data.currency,
             data.returnUrl,
             data.cancelUrl,

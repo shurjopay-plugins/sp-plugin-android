@@ -3,36 +3,23 @@ plugins {
     id "kotlin-android"
 }
 
-def keystorePropertiesFile = rootProject.file("keystore.properties")
-def keystoreProperties = new Properties()
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-
 android {
+    namespace 'com.shurjopay.sdk'
     compileSdk 33
-
-    signingConfigs {
-        release {
-            keyAlias keystoreProperties["keyAlias"]
-            keyPassword keystoreProperties["keyPassword"]
-            storeFile file(keystoreProperties["storeFile"])
-            storePassword keystoreProperties["storePassword"]
-        }
-    }
 
     defaultConfig {
         applicationId "com.shurjopay.sdk"
         minSdk 21
         targetSdk 33
         versionCode 111
-        versionName "2.1.7"
-        signingConfig signingConfigs.release
+        versionName "2.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            debuggable true
-            minifyEnabled true
+            debuggable false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
@@ -49,7 +36,7 @@ android {
     buildFeatures {
         viewBinding true
     }
-    namespace 'com.shurjopay.sdk'
+
 }
 
 dependencies {

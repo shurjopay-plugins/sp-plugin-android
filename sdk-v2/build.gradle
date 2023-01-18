@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    namespace "com.shurjopay.sdk.v2"
     compileSdk 33
 
     defaultConfig {
@@ -17,7 +18,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             consumerProguardFiles "consumer-rules.pro"
         }
@@ -35,7 +36,7 @@ android {
     buildFeatures {
         viewBinding true
     }
-    namespace "com.shurjopay.sdk.v2"
+
 }
 
 dependencies {

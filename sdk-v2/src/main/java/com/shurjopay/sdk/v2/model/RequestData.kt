@@ -4,16 +4,10 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
- * Required Data data class
- *
- * @author  Rz Rasel
- * @since   2021-08-07
+ * Created by @author Moniruzzaman on 17/1/23. github: filelucker
  */
 @Parcelize
-data class RequiredData(
-    var username: String,
-    var password: String,
-    var prefix: String,
+data class RequestData(
     var currency: String,
     var amount: Double,
     var orderId: String,

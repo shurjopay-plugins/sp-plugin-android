@@ -27,61 +27,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-pay()
-    }
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun pay() {
-        val data = ShurjopayRequestModel(
-            "BDT",
-            10.0,
-            "NOK" + Random().nextInt(1000000),
-            null,
-            null,
-            "binding.nameLayout.editText?.text.toString()",
-            "binding.phoneLayout.editText?.text.toString()",
-            null,
-            "binding.addressLayout.editText?.text.toString()",
-            "binding.cityLayout.editText?.text.toString()",
-            null,
-            null,
-            null,
-            "https://www.sandbox.shurjopayment.com/return_url",
-            "https://www.sandbox.shurjopayment.com/cancel_url",
-            "127.0.0.1",
-            "value-of-1",
-            "value-of-2",
-            "value-of-3",
-            "value-of-4"
-        )
-//        var s = ShurjoPay("dd")
-
-        var config = ShurjopayConfigs(
-            username = "sp_sandbox",
-            password =  "pyyk97hu&6u6",
-            prefix= "sp",
-            enviornment = SDK_TYPE_SANDBOX
-        )
-        val s = Shurjopay(config)
-        s.makePayment(
-            this,
-            data,
-            object : PaymentResultListener {
-                override fun onSuccess(successError: SuccessError) {
-                    Log.d(TAG, "onSuccess: debugMessage = ${successError.debugMessage}")
-                }
-
-                override fun onFailed(successError: SuccessError) {
-                    Log.d(TAG, "onFailed: debugMessage = ${successError.debugMessage}")
-                }
-
-                override fun onBackButtonListener(successError: SuccessError): Boolean {
-                    Log.d(TAG, "onBackButton: debugMessage = ${successError.debugMessage}")
-                    return true
-                }
-            })
-
-
-
     }
 
 }

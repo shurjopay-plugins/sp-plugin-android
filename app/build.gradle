@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.shurjopay.sdk'
+    namespace 'sp.plugin.android'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.shurjopay.sdk"
+        applicationId "sp.plugin.android"
         minSdk 21
         targetSdk 33
         versionCode 111

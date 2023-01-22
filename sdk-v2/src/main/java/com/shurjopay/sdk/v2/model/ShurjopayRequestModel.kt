@@ -8,6 +8,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class ShurjopayRequestModel(
+    var prefix: String,
     var currency: String,
     var amount: Double,
     var orderId: String,

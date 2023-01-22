@@ -243,6 +243,7 @@ class PaymentActivity : AppCompatActivity() {
                 Constants.PAYMENT_CANCELLED_BY_USER,
             )
         )
+        finish()
     }
 
     companion object {
@@ -256,7 +257,7 @@ class PaymentActivity : AppCompatActivity() {
         return CheckoutRequest(
             tokenResponse?.token.toString(),
             tokenResponse?.store_id!!,
-            config.SP_PREFIX,
+            data.prefix,
             data.currency,
             data.returnUrl,
             data.cancelUrl,

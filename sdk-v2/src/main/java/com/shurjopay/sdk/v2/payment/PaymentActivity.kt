@@ -149,10 +149,21 @@ class PaymentActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 binding.webView.setVisibility(View.GONE);
                 if (url.contains(data.cancelUrl.toString())) {
+                    hideProgress()
                     Shurjopay.listener?.onFailed(
                         ShurjopayException(
                             Constants.ResponseType.HTTP_ERROR, null,
                             Constants.PAYMENT_CANCELLED,
+                        )
+                    )
+                }
+
+                if (url.contains(data.returnUrl.toString())) {
+                    hideProgress()
+                    Shurjopay.listener?.onFailed(
+                        ShurjopayException(
+                            Constants.ResponseType.PAYMENT_CANCEL, null,
+                            Constants.PAYMENT_CANCELLED_BY_USER,
                         )
                     )
                 }

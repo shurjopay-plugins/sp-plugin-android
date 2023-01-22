@@ -1,14 +1,13 @@
 package com.shurjopay.sdk.v2.model
 
 /**
- * Error Success class
- *
- * @author  Rz Rasel
- * @since   2021-08-07
+ * Created by @author Moniruzzaman on 22/1/23. github: filelucker
  */
-class ErrorSuccess(esType: ESType?, transactionInfo: TransactionInfo?, message: String?, debugMessage: String? = null) {
+class SuccessError(esType: ESType?,
+                   transactionInfo: VerifyResponse?,
+                   message: String?, debugMessage: String? = null) {
     var esType: ESType? = null
-    var transactionInfo: TransactionInfo? = null
+    var transactionInfo: VerifyResponse? = null
     var message: String? = null
     var debugMessage: String? = null
     init {

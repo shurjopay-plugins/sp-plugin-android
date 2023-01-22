@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
  * Created by @author Moniruzzaman on 17/1/23. github: filelucker
  */
 @Parcelize
-data class RequestData(
+data class ShurjopayRequestModel(
     var currency: String,
     var amount: Double,
     var orderId: String,

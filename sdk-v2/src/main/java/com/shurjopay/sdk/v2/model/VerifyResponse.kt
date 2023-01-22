@@ -1,12 +1,9 @@
 package com.shurjopay.sdk.v2.model
 
 /**
- * Transaction Info data class
- *
- * @author  Rz Rasel
- * @since   2021-08-07
+ * Created by @author Moniruzzaman on 10/1/23. github: filelucker
  */
-data class TransactionInfo(
+data class VerifyResponse(
     var id: Int?,
     var order_id: String,
     var currency: String?,

@@ -28,6 +28,7 @@ import androidx.annotation.Keep
     const val NO_USER_CREDENTIAL = "User credentials not found"
     const val INVALID_AMOUNT = "Invalid amount!"
     const val DATA = "data"
+    const val CONFIGS = "configs"
     const val DEF_TYPE = "string"
     const val CONFIG_SDK_TYPE = "shurjopay_sdk_type"
     const val CONFIG_USERNAME = "shurjopay_username"

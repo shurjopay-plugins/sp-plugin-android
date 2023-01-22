@@ -1,15 +1,12 @@
 package com.shurjopay.sdk.v2.payment
 
-import com.shurjopay.sdk.v2.model.ErrorSuccess
+import com.shurjopay.sdk.v2.model.SuccessError
 
 /**
- * Payment Result Listener interface
- *
- * @author  Rz Rasel
- * @since   2021-08-07
+ * Created by @author Moniruzzaman on 10/1/23. github: filelucker
  */
 interface PaymentResultListener {
-    fun onSuccess(errorSuccess: ErrorSuccess)
-    fun onFailed(errorSuccess: ErrorSuccess)
-    fun onBackButtonListener(errorSuccess: ErrorSuccess): Boolean
+    fun onSuccess(successError: SuccessError)
+    fun onFailed(successError: SuccessError)
+    fun onBackButtonListener(successError: SuccessError): Boolean
 }

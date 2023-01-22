@@ -1,6 +1,5 @@
 package com.shurjopay.sdk.v2.payment
 
-import android.app.ProgressDialog
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
@@ -15,11 +14,7 @@ import com.shurjopay.sdk.v2.databinding.ActivityPaymentBinding
 import com.shurjopay.sdk.v2.model.*
 import com.shurjopay.sdk.v2.networking.ApiClient
 import com.shurjopay.sdk.v2.networking.ApiInterface
-import com.shurjopay.sdk.v2.utils.AppResourse
 import com.shurjopay.sdk.v2.utils.Constants
-import com.shurjopay.sdk.v2.utils.Constants.Companion.CONFIG_PASSWORD
-import com.shurjopay.sdk.v2.utils.Constants.Companion.CONFIG_SDK_TYPE
-import com.shurjopay.sdk.v2.utils.Constants.Companion.CONFIG_USERNAME
 import com.shurjopay.sdk.v2.utils.IndeterminateProgressDialog
 import retrofit2.Call
 import retrofit2.Callback
@@ -37,8 +32,9 @@ class PaymentActivity : AppCompatActivity() {
     private lateinit var sdkType: String
     private lateinit var username: String
     private lateinit var password: String
-    private lateinit var data: RequestData
-    private var tokenResponse: Token? = null
+    private lateinit var data: ShurjopayRequestModel
+    private lateinit var config: ShurjopayConfigs
+    private var tokenResponse: AuthenticationResponse? = null
     private var checkoutRequest: CheckoutRequest? = null
     private var checkoutResponse: CheckoutResponse? = null
 
@@ -52,28 +48,32 @@ class PaymentActivity : AppCompatActivity() {
         progressDialog.setCanceledOnTouchOutside(false)
         progressDialog.setCancelable(false)
 
-        sdkType = AppResourse().getString(CONFIG_SDK_TYPE, this@PaymentActivity).trim()
-        username = AppResourse().getString(CONFIG_USERNAME, this@PaymentActivity).trim()
-        password = AppResourse().getString(CONFIG_PASSWORD, this@PaymentActivity).trim()
+//        sdkType = AppResourse().getString(CONFIG_SDK_TYPE, this@PaymentActivity).trim()
+//        username = AppResourse().getString(CONFIG_USERNAME, this@PaymentActivity).trim()
+//        password = AppResourse().getString(CONFIG_PASSWORD, this@PaymentActivity).trim()
 
         if (Build.VERSION.SDK_INT >= 33) {
-            data = intent.getParcelableExtra(Constants.DATA, RequestData::class.java)!!
+            data = intent.getParcelableExtra(Constants.DATA, ShurjopayRequestModel::class.java)!!
+            config = intent.getParcelableExtra(Constants.CONFIGS, ShurjopayConfigs::class.java)!!
         } else {
             data = intent.getParcelableExtra(Constants.DATA)!!
+            config = intent.getParcelableExtra(Constants.CONFIGS)!!
         }
+        sdkType = config.enviornment
+        username = config.username
+        password = config.password
+
         getToken()
     }
 
     private fun getToken() {
         showProgress()
-        val token = Token(
-            username, password, null, null, null,
-            null, null, null, null
-        )
 
-        ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.getToken(token)
-            ?.enqueue(object : Callback<Token> {
-                override fun onResponse(call: Call<Token>, response: Response<Token>) {
+        val authenticationRequest = AuthenticationRequest(username, password)
+
+        ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.getToken(authenticationRequest)
+            ?.enqueue(object : Callback<AuthenticationResponse> {
+                override fun onResponse(call: Call<AuthenticationResponse>, response: Response<AuthenticationResponse>) {
                     if (response.isSuccessful) {
                         hideProgress()
                         tokenResponse = response.body()
@@ -81,11 +81,11 @@ class PaymentActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<Token>, t: Throwable) {
+                override fun onFailure(call: Call<AuthenticationResponse>, t: Throwable) {
                     hideProgress()
-                    ShurjoPaySDK.listener?.onFailed(
-                        ErrorSuccess(
-                            ErrorSuccess.ESType.HTTP_ERROR,
+                    Shurjopay.listener?.onFailed(
+                        SuccessError(
+                            SuccessError.ESType.HTTP_ERROR,
                             null,
                             Constants.PAYMENT_DECLINED,
                         )
@@ -95,11 +95,13 @@ class PaymentActivity : AppCompatActivity() {
             })
     }
 
+
+
     private fun getExecuteUrl() {
         showProgress()
         checkoutRequest = onExecuteUrlDataBuilder(tokenResponse, data)
         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.checkout(
-            "Bearer " + tokenResponse?.token,
+            tokenResponse?.token_type + " " + tokenResponse?.token,
             checkoutRequest!!
         )?.enqueue(object : Callback<CheckoutResponse> {
             override fun onResponse(
@@ -115,9 +117,9 @@ class PaymentActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<CheckoutResponse>, t: Throwable) {
                 hideProgress()
-                ShurjoPaySDK.listener?.onFailed(
-                    ErrorSuccess(
-                        ErrorSuccess.ESType.HTTP_ERROR,
+                Shurjopay.listener?.onFailed(
+                    SuccessError(
+                        SuccessError.ESType.HTTP_ERROR,
                         null,
                         Constants.PAYMENT_DECLINED,
                     )
@@ -134,21 +136,22 @@ class PaymentActivity : AppCompatActivity() {
         binding.webView.loadUrl(checkoutResponse?.checkout_url.toString())
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-//        Log.d(TAG, "shouldOverrideUrlLoading: url = $url")
                 binding.webView.setVisibility(View.GONE);
                 if (url.contains(data.cancelUrl.toString())) {
-                    ShurjoPaySDK.listener?.onFailed(
-                        ErrorSuccess(
-                            ErrorSuccess.ESType.HTTP_ERROR,
+                    Shurjopay.listener?.onFailed(
+                        SuccessError(
+                            SuccessError.ESType.HTTP_ERROR,
                             null,
                             Constants.PAYMENT_CANCELLED,
                         )
                     )
-                    finish()
                 }
+
                 if (url.contains(data.returnUrl.toString()) && url.contains("order_id")) {
                     verifyPayment()
+
                 }
+                finish()
                 return false
             }
 
@@ -169,23 +172,24 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun verifyPayment() {
         showProgress()
-        val transactionInfo = onVerifyPaymentDataBuilder(checkoutResponse)
+//        val transactionInfo = onVerifyPaymentDataBuilder(checkoutResponse)
+        val transactionInfo = VerifyRequest(checkoutResponse!!.sp_order_id)
 
         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
-            "Bearer " + tokenResponse?.token,
+            tokenResponse?.token_type + " " + tokenResponse?.token,
             transactionInfo
-        )?.enqueue(object : Callback<List<TransactionInfo>> {
+        )?.enqueue(object : Callback<List<VerifyResponse>> {
             override fun onResponse(
-                call: Call<List<TransactionInfo>>,
-                response: Response<List<TransactionInfo>>
+                call: Call<List<VerifyResponse>>,
+                response: Response<List<VerifyResponse>>
             ) {
                 hideProgress()
                 if (response.isSuccessful) {
                     if (response.body()?.get(0)?.sp_code == 1000) {
-                        ShurjoPaySDK.listener?.onSuccess(
-                            ErrorSuccess(
-                                ErrorSuccess.ESType.SUCCESS,
-                                response.body()?.get(0),
+                        Shurjopay.listener?.onSuccess(
+                            SuccessError(
+                                SuccessError.ESType.SUCCESS,
+                                response.body()!!.get(0),
                                 "Payment successfully done",
                             )
                         )
@@ -194,11 +198,11 @@ class PaymentActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<List<TransactionInfo>>, t: Throwable) {
+            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
                 hideProgress()
-                ShurjoPaySDK.listener?.onFailed(
-                    ErrorSuccess(
-                        ErrorSuccess.ESType.HTTP_ERROR,
+                Shurjopay.listener?.onFailed(
+                    SuccessError(
+                        SuccessError.ESType.HTTP_ERROR,
                         null,
                         Constants.PLEASE_CHECK_YOUR_PAYMENT,
                     )
@@ -219,9 +223,9 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {
-        ShurjoPaySDK.listener?.onFailed(
-            ErrorSuccess(
-                ErrorSuccess.ESType.HTTP_ERROR,
+        Shurjopay.listener?.onBackButtonListener(
+            SuccessError(
+                SuccessError.ESType.HTTP_ERROR,
                 null,
                 Constants.PAYMENT_CANCELLED_BY_USER,
             )
@@ -235,13 +239,13 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     private fun onExecuteUrlDataBuilder(
-        tokenResponse: Token?,
-        data: RequestData
+        tokenResponse: AuthenticationResponse?,
+        data: ShurjopayRequestModel
     ): CheckoutRequest {
         return CheckoutRequest(
             tokenResponse?.token.toString(),
             tokenResponse?.store_id!!,
-            sdkType,
+            config.prefix,
             data.currency,
             data.returnUrl,
             data.cancelUrl,
@@ -265,37 +269,4 @@ class PaymentActivity : AppCompatActivity() {
         )
     }
 
-    private fun onVerifyPaymentDataBuilder(checkoutResponse: CheckoutResponse?): TransactionInfo {
-        return TransactionInfo(
-            null,
-            checkoutResponse?.sp_order_id!!,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
-    }
 }

@@ -3,8 +3,10 @@ package com.shurjopay.sdk.v2.utils
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Debug
 import android.util.Log
+import androidx.annotation.RequiresApi
 
 /**
  * Network Manager object
@@ -14,6 +16,7 @@ import android.util.Log
  */
 object NetworkManager {
 
+  @RequiresApi(Build.VERSION_CODES.M)
   fun isInternetAvailable(context: Context): Boolean {
     val connectivityManager =
       context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -26,11 +29,11 @@ object NetworkManager {
             return true
           }
           capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-//            Log.i(TAG, "NetworkCapabilities.TRANSPORT_WIFI")
+            Log.i(TAG, "NetworkCapabilities.TRANSPORT_WIFI")
             return true
           }
           capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-//            Log.i(TAG, "NetworkCapabilities.TRANSPORT_ETHERNET")
+            Log.i(TAG, "NetworkCapabilities.TRANSPORT_ETHERNET")
             return true
           }
         }

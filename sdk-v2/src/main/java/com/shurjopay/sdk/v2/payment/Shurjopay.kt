@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.shurjopay.sdk.v2.model.SuccessError
 import com.shurjopay.sdk.v2.model.ShurjopayConfigs
+import com.shurjopay.sdk.v2.model.ShurjopayException
 import com.shurjopay.sdk.v2.model.ShurjopayRequestModel
 import com.shurjopay.sdk.v2.utils.Constants
 import com.shurjopay.sdk.v2.utils.NetworkManager.isInternetAvailable
@@ -28,9 +28,8 @@ class Shurjopay constructor(configs: ShurjopayConfigs) {
 
         if (configuration == null) {
             listener!!.onFailed(
-                SuccessError(
-                    SuccessError.ESType.ERROR,
-                    null,
+                ShurjopayException(
+                   Constants.ResponseType.ERROR, null,
                     Constants.NO_USER_CREDENTIAL
                 )
             )
@@ -38,9 +37,8 @@ class Shurjopay constructor(configs: ShurjopayConfigs) {
 
             if (!isInternetAvailable(context)) {
                 listener!!.onFailed(
-                    SuccessError(
-                        SuccessError.ESType.INTERNET_ERROR,
-                        null,
+                    ShurjopayException(
+                        Constants.ResponseType.ERROR, null,
                         Constants.NO_INTERNET_MESSAGE
                     )
                 )

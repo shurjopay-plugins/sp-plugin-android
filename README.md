@@ -5,13 +5,14 @@ Official shurjoPay Android plugin for merchants or service providers to connect 
 This plugin can be used with any Android application (e.g. Kotlin, Java).
 
 1. **makePayment**: create and send payment request
-2. **verifyPayment**: verify payment status at shurjoPay
+2. **getToken**: to get shurjoPay authorization token for future use
 
 Also reduces many of the things that you had to do manually:
 
 - Handles http requests and errors.
 - JSON serialization and deserialization.
 - Authentication during initiating and verifying of payments.
+
 ## Audience
 This document is intended for the technical personnel of merchants and service providers who wants to integrate our online payment gateway for Android application using kotlin plugin provided by _**shurjoMukhi Limited**_.
 
@@ -49,18 +50,21 @@ Add it in your root build.gradle at the end of repositories:
 ```gradel
 	dependencies {
 		...
-	        implementation 'com.github.filelucker:test-plugin:v1.1.6'     // TODO: Need to change this
+	        implementation 'com.github.filelucker:test-plugin:v1.2.1'     // TODO: Need to change this
 		...
 	}
   ```
   
-  Step 3. Add these resource in the project string
+  Step 3. Add these constraints(SP_USER, SP_PASS and SHURJOPAY_API) to configure Shurjopay instance
   
-  ```xml
-    <string name="shurjopay_username">username</string>
-    <string name="shurjopay_password">passwor</string>
-    <string name="shurjopay_prefix">prefix</string>
-    <string name="shurjopay_sdk_type">sdk_type</string>      // It can be "sandbox", "live", "ipn-sandbox" or "ipn-live"
+  ```kotlin
+        shurjopay = Shurjopay(
+            ShurjopayConfigs(
+                username = SP_USER,
+                password = SP_PASS,
+                baseUrl = SHURJOPAY_API
+            )
+        )    
   ```
   
 # Android AndroidManifest
@@ -71,9 +75,10 @@ Add it in your root build.gradle at the end of repositories:
 
 # Request Data Model Setup:
 
-```git_request_data_model_setup
+```kotlin
 // TODO request data model setup
-val data = RequestData(
+val data = ShurjopayRequestModel(
+    prefix,
     currency,
     amount,
     orderId,
@@ -97,51 +102,28 @@ val data = RequestData(
 )
 ```
 
-# Response Listener Setup:
-
-
-```git_response_listener_setup
-// TODO response listener
-object : PaymentResultListener {
-    override fun onSuccess(errorSuccess: ErrorSuccess) {
-        Log.d(TAG, "onSuccess: transactionInfo = ${errorSuccess.transactionInfo}")
-        Toast.makeText(
-            this@MainActivity, "onSuccess: transactionInfo = " +
-                    errorSuccess.transactionInfo, Toast.LENGTH_LONG
-        ).show()
-    }
-    
-    override fun onFailed(errorSuccess: ErrorSuccess) {
-        Log.d(TAG, "onFailed: message = ${errorSuccess.message}")
-        Toast.makeText(this@MainActivity, errorSuccess.message, Toast.LENGTH_SHORT).show()
-    }
-    
-    override fun onBackButtonListener(errorSuccess: ErrorSuccess): Boolean {
-        return true
-    }
-}
-```
-
 # Payment Request Setup:
 
-```git_payment_request_setup
+```kotlin
 // TODO payment request setup
-ShurjoPaySDK.instance?.makePayment(
-this, data, object : PaymentResultListener {
-    override fun onSuccess(errorSuccess: ErrorSuccess) {
-        Log.d(TAG, "onSuccess: transactionInfo = ${errorSuccess.transactionInfo}")
-        Toast.makeText(
-            this@MainActivity, "onSuccess: transactionInfo = " +
-                    errorSuccess.transactionInfo, Toast.LENGTH_LONG
-        ).show()
-    }
+      shurjopay?.makePayment(this, data,
+            object : PaymentResultListener {
+                override fun onSuccess(success: ShurjopaySuccess) {
+                    Log.d(TAG, "onSuccess: debugMessage = ${success.debugMessage}")
+                }
 
-    override fun onFailed(errorSuccess: ErrorSuccess) {
-        Log.d(TAG, "onFailed: message = ${errorSuccess.message}")
-        Toast.makeText(this@MainActivity, errorSuccess.message, Toast.LENGTH_SHORT).show()
-    }
-})
+                override fun onFailed(exception: ShurjopayException) {
+                    Log.d(TAG, "onFailed: debugMessage = ${exception.debugMessage}")
+                }
+
+                override fun onBackButtonListener(exception: ShurjopayException): Boolean {
+                    Log.d(TAG, "onBackButton: debugMessage = ${exception.debugMessage}")
+                    return true
+                }
+
+            })
 ```
+
 
 ### That's all! Now you are ready to use the python plugin to seamlessly integrate with shurjoPay to make your payment system easy and smooth.
 

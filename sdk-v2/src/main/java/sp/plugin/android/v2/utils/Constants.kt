@@ -18,6 +18,7 @@ import androidx.annotation.Keep
     const val NO_NETWORK_STATE_PERMISSION = "No network state permission is given!"
     const val NO_INTERNET_MESSAGE = "No internet connection! Please check your connection settings."
     const val NO_USER_CREDENTIAL = "User credentials not found"
+    const val USER_CREDENTIAL_DELIVERED = "User credentials served"
     const val INVALID_AMOUNT = "Invalid amount!"
     const val DATA = "data"
     const val CONFIGS = "configs"

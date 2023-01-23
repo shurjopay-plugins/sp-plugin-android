@@ -56,13 +56,13 @@ class PaymentActivity : AppCompatActivity() {
             config = intent.getParcelableExtra(Constants.CONFIGS)!!
         }
 
-        sdkType = config.SHURJOPAY_API
-        username = config.SP_USER
-        password = config.SP_PASS
+        sdkType = config.baseUrl
+        username = config.username
+        password = config.password
 
 
         try {
-            getToken()
+            getToken(username, password, sdkType, false)
         } catch (e: Exception) {
             e.printStackTrace()
             hideProgress()
@@ -76,23 +76,34 @@ class PaymentActivity : AppCompatActivity() {
 
     }
 
-    private fun getToken() {
-        showProgress()
+    fun getToken(username: String, password: String, sdkType: String, onlyToken: Boolean) {
+        if (!onlyToken) {
+            showProgress()
+        }
 
         val authenticationRequest = AuthenticationRequest(username, password)
 
-        sp.plugin.android.v2.networking.ApiClient()
-            .getApiClient(sdkType)?.create(sp.plugin.android.v2.networking.ApiInterface::class.java)
-            ?.getToken(authenticationRequest)
-            ?.enqueue(object : Callback<AuthenticationResponse> {
+        ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)
+            ?.getToken(authenticationRequest)?.enqueue(object : Callback<AuthenticationResponse> {
                 override fun onResponse(
                     call: Call<AuthenticationResponse>,
                     response: Response<AuthenticationResponse>
                 ) {
                     if (response.isSuccessful) {
-                        hideProgress()
-                        tokenResponse = response.body()
-                        getExecuteUrl()
+
+                        if (onlyToken) {
+                            listener?.onSuccess(
+                                ShurjopaySuccess(
+                                    Constants.ResponseType.SUCCESS, null,
+                                    null,
+                                    Constants.USER_CREDENTIAL_DELIVERED, response.body()
+                                )
+                            )
+                        } else {
+                            hideProgress()
+                            tokenResponse = response.body()
+                            getExecuteUrl()
+                        }
                     }
                 }
 
@@ -160,19 +171,18 @@ class PaymentActivity : AppCompatActivity() {
                     )
                 }
 
-                if (url.contains(data.returnUrl.toString())) {
-                    hideProgress()
-                    listener?.onFailed(
-                        ShurjopayException(
-                            Constants.ResponseType.PAYMENT_CANCEL, null,
-                            Constants.PAYMENT_CANCELLED_BY_USER,
-                        )
-                    )
-                }
+//                if (url.contains(data.returnUrl.toString())) {
+//                    hideProgress()
+//                    listener?.onFailed(
+//                        ShurjopayException(
+//                            Constants.ResponseType.PAYMENT_CANCEL, null,
+//                            Constants.PAYMENT_CANCELLED_BY_USER,
+//                        )
+//                    )
+//                }
 
                 if (url.contains(data.returnUrl.toString()) && url.contains("order_id")) {
                     verifyPayment()
-
                 }
                 finish()
                 return false
@@ -198,42 +208,50 @@ class PaymentActivity : AppCompatActivity() {
 
         val transactionInfo = VerifyRequest(checkoutResponse!!.sp_order_id)
 
-        sp.plugin.android.v2.networking.ApiClient()
-            .getApiClient(sdkType)?.create(sp.plugin.android.v2.networking.ApiInterface::class.java)
-            ?.verify(
-                tokenResponse?.token_type + " " + tokenResponse?.token,
-                transactionInfo
-            )?.enqueue(object : Callback<List<VerifyResponse>> {
-                override fun onResponse(
-                    call: Call<List<VerifyResponse>>,
-                    response: Response<List<VerifyResponse>>
-                ) {
-                    hideProgress()
-                    if (response.isSuccessful) {
-                        if (response.body()?.get(0)?.sp_code == 1000) {
-                            sp.plugin.android.v2.payment.Shurjopay.Companion.listener?.onSuccess(
-                                ShurjopaySuccess(
-                                    Constants.ResponseType.SUCCESS,
-                                    response.body()!!.get(0),
-                                    Constants.PAYMENT_SUCCESSFUL,
-                                )
-                            )
-                            finish()
-                        }
-                    }
-                }
+        ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
+            tokenResponse?.token_type + " " + tokenResponse?.token,
+            transactionInfo
+        )?.enqueue(object : Callback<List<VerifyResponse>> {
+            override fun onResponse(
+                call: Call<List<VerifyResponse>>,
+                response: Response<List<VerifyResponse>>
+            ) {
 
-                override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
+                if (response.isSuccessful) {
                     hideProgress()
-                    listener?.onFailed(
-                        ShurjopayException(
-                            Constants.ResponseType.HTTP_ERROR, null,
-                            Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                    if (response.body()?.get(0)?.sp_code == 1000) {
+
+                        listener?.onSuccess(
+                            ShurjopaySuccess(
+                                Constants.ResponseType.SUCCESS,
+                                response.body()!!.get(0),
+                                Constants.PAYMENT_SUCCESSFUL, null, null
+                            )
                         )
-                    )
+
+                    }else{
+                        listener?.onFailed(
+                            ShurjopayException(
+                                Constants.ResponseType.PAYMENT_CANCEL, null,
+                                Constants.PAYMENT_CANCELLED_BY_USER,
+                            )
+                        )
+                    }
                     finish()
                 }
-            })
+            }
+
+            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
+                hideProgress()
+                listener?.onFailed(
+                    ShurjopayException(
+                        Constants.ResponseType.HTTP_ERROR, null,
+                        Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                    )
+                )
+                finish()
+            }
+        })
     }
 
     private fun showProgress() {

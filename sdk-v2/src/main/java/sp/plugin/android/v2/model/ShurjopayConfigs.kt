@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class ShurjopayConfigs(
-    var SP_USER: String,
-    var SP_PASS: String,
-    var SHURJOPAY_API: String,
+    var username: String,
+    var password: String,
+    var baseUrl: String,
     ) : Parcelable

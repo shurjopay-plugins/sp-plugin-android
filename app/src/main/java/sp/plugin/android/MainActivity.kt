@@ -2,9 +2,16 @@ package sp.plugin.android
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import sp.plugin.android.databinding.ActivityMainBinding
+import sp.plugin.android.v2.model.ShurjopayConfigs
+import sp.plugin.android.v2.model.ShurjopayException
+import sp.plugin.android.v2.model.ShurjopayRequestModel
+import sp.plugin.android.v2.model.ShurjopaySuccess
+import sp.plugin.android.v2.payment.PaymentResultListener
+import sp.plugin.android.v2.payment.Shurjopay
 import java.util.*
 
 /**
@@ -19,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
 
     }
 }

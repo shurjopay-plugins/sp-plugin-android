@@ -4,20 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
+import sp.plugin.android.v2.model.ShurjopayConfigs
+import sp.plugin.android.v2.model.ShurjopayException
+import sp.plugin.android.v2.model.ShurjopayRequestModel
 import sp.plugin.android.v2.utils.Constants
 import sp.plugin.android.v2.utils.NetworkManager.isInternetAvailable
 
 /**
  * Created by @author Moniruzzaman on 10/1/23. github: filelucker
  */
-class Shurjopay constructor(configs: sp.plugin.android.v2.model.ShurjopayConfigs) {
+class Shurjopay constructor(configs: ShurjopayConfigs) {
 
     var configuration = configs;
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun makePayment(
         context: Context,
-        data: sp.plugin.android.v2.model.ShurjopayRequestModel?,
+        data: ShurjopayRequestModel?,
         resultListener: PaymentResultListener?
     ) {
 
@@ -25,7 +28,7 @@ class Shurjopay constructor(configs: sp.plugin.android.v2.model.ShurjopayConfigs
 
         if (configuration == null) {
             listener!!.onFailed(
-                sp.plugin.android.v2.model.ShurjopayException(
+                ShurjopayException(
                     Constants.ResponseType.ERROR, null,
                     Constants.NO_USER_CREDENTIAL
                 )
@@ -34,14 +37,14 @@ class Shurjopay constructor(configs: sp.plugin.android.v2.model.ShurjopayConfigs
 
             if (!isInternetAvailable(context)) {
                 listener!!.onFailed(
-                    sp.plugin.android.v2.model.ShurjopayException(
+                    ShurjopayException(
                         Constants.ResponseType.ERROR, null,
                         Constants.NO_INTERNET_MESSAGE
                     )
                 )
                 return
             }
-            val intent = Intent(context, sp.plugin.android.v2.payment.PaymentActivity::class.java)
+            val intent = Intent(context, PaymentActivity::class.java)
             intent.putExtra(Constants.DATA, data)
             intent.putExtra(Constants.CONFIGS, configuration);
             context.startActivity(intent)
@@ -51,6 +54,38 @@ class Shurjopay constructor(configs: sp.plugin.android.v2.model.ShurjopayConfigs
 
     companion object {
         var listener: PaymentResultListener? = null
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun getToken(
+        context: Context,
+        resultListener: PaymentResultListener?
+    ) {
+
+        listener = resultListener
+
+        if (configuration == null) {
+            listener!!.onFailed(
+                ShurjopayException(
+                    Constants.ResponseType.ERROR, null,
+                    Constants.NO_USER_CREDENTIAL
+                )
+            )
+        } else {
+
+            if (!isInternetAvailable(context)) {
+                listener!!.onFailed(
+                    ShurjopayException(
+                        Constants.ResponseType.ERROR, null,
+                        Constants.NO_INTERNET_MESSAGE
+                    )
+                )
+                return
+            }
+            PaymentActivity().getToken(configuration.username, configuration.password, configuration.baseUrl, true)
+
+        }
     }
 
 }

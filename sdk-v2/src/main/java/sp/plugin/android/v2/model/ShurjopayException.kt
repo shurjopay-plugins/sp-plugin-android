@@ -7,10 +7,10 @@ import sp.plugin.android.v2.utils.Constants
  * Created by @author Moniruzzaman on 22/1/23. github: filelucker
  */
 class ShurjopayException(resType: Constants.ResponseType?,
-                         transactionInfo: sp.plugin.android.v2.model.VerifyResponse?,
+                         transactionInfo: VerifyResponse?,
                          message: String?, debugMessage: String? = null) {
     var resType: Constants.ResponseType? = null
-    var transactionInfo: sp.plugin.android.v2.model.VerifyResponse? = null
+    var transactionInfo: VerifyResponse? = null
     var message: String? = null
     var debugMessage: String? = null
     init {

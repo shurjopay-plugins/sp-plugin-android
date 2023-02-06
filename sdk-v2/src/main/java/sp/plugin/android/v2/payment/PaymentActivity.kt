@@ -43,6 +43,7 @@ class PaymentActivity : AppCompatActivity() {
         binding = ActivityPaymentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         progressDialog = IndeterminateProgressDialog(this)
         progressDialog.setMessage("Please wait...")
         progressDialog.setCanceledOnTouchOutside(false)
@@ -229,7 +230,7 @@ class PaymentActivity : AppCompatActivity() {
                             )
                         )
 
-                    }else{
+                    } else {
                         listener?.onFailed(
                             ShurjopayException(
                                 Constants.ResponseType.PAYMENT_CANCEL, null,
@@ -252,6 +253,98 @@ class PaymentActivity : AppCompatActivity() {
                 finish()
             }
         })
+    }
+
+    fun verifyPayment(username:String, password:String, sdkType:String, sp_order_id: String) {
+
+
+        val authenticationRequest = AuthenticationRequest(username, password)
+
+        ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)
+            ?.getToken(authenticationRequest)?.enqueue(object : Callback<AuthenticationResponse> {
+                override fun onResponse(
+                    call: Call<AuthenticationResponse>,
+                    response: Response<AuthenticationResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val transactionInfo = VerifyRequest(sp_order_id)
+                        // verify payment start
+                        ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
+                            response.body()?.token_type + " " + response.body()?.token,
+                            transactionInfo
+                        )?.enqueue(object : Callback<List<VerifyResponse>> {
+                            override fun onResponse(
+                                call: Call<List<VerifyResponse>>,
+                                response: Response<List<VerifyResponse>>
+                            ) {
+
+                                if (response.isSuccessful) {
+                                    if (response.body()?.get(0)?.sp_code == 1000) {
+
+                                        listener?.onSuccess(
+                                            ShurjopaySuccess(
+                                                Constants.ResponseType.SUCCESS,
+                                                response.body()!!.get(0),
+                                                Constants.PAYMENT_SUCCESSFUL, null, null
+                                            )
+                                        )
+
+                                    } else {
+                                        listener?.onFailed(
+                                            ShurjopayException(
+                                                Constants.ResponseType.PAYMENT_CANCEL, null,
+                                                Constants.PAYMENT_CANCELLED_BY_USER,
+                                            )
+                                        )
+                                    }
+
+                                } else {
+                                    listener?.onFailed(
+                                        ShurjopayException(
+                                            Constants.ResponseType.HTTP_ERROR, null,
+                                            Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
+
+                                listener?.onFailed(
+                                    ShurjopayException(
+                                        Constants.ResponseType.HTTP_ERROR, null,
+                                        Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                                    )
+                                )
+
+                            }
+                        })
+                        //////// end
+
+
+                    } else {
+                        listener?.onFailed(
+                            ShurjopayException(
+                                Constants.ResponseType.HTTP_ERROR, null,
+                                Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                            )
+                        )
+                    }
+
+                }
+
+                override fun onFailure(call: Call<AuthenticationResponse>, t: Throwable) {
+                    listener?.onFailed(
+                        ShurjopayException(
+                            Constants.ResponseType.HTTP_ERROR, null,
+                            Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                        )
+                    )
+
+                }
+            })
+
+
     }
 
     private fun showProgress() {

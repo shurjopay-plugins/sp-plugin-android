@@ -65,27 +65,39 @@ class Shurjopay constructor(configs: ShurjopayConfigs) {
 
         listener = resultListener
 
-        if (configuration == null) {
+        if (!isInternetAvailable(context)) {
             listener!!.onFailed(
                 ShurjopayException(
                     Constants.ResponseType.ERROR, null,
-                    Constants.NO_USER_CREDENTIAL
+                    Constants.NO_INTERNET_MESSAGE
                 )
             )
-        } else {
-
-            if (!isInternetAvailable(context)) {
-                listener!!.onFailed(
-                    ShurjopayException(
-                        Constants.ResponseType.ERROR, null,
-                        Constants.NO_INTERNET_MESSAGE
-                    )
-                )
-                return
-            }
-            PaymentActivity().getToken(configuration.username, configuration.password, configuration.baseUrl, true)
-
+            return
         }
+        PaymentActivity().getToken(configuration.username, configuration.password, configuration.baseUrl, true)
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun verifyPayment(
+        context: Context,
+        spOrderId: String,
+        resultListener: PaymentResultListener?
+    ) {
+
+        listener = resultListener
+
+        if (!isInternetAvailable(context)) {
+            listener!!.onFailed(
+                ShurjopayException(
+                    Constants.ResponseType.ERROR, null,
+                    Constants.NO_INTERNET_MESSAGE
+                )
+            )
+            return
+        }
+        PaymentActivity().verifyPayment(configuration.username, configuration.password, configuration.baseUrl, spOrderId)
+
     }
 
 }

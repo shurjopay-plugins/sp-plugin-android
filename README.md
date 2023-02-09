@@ -6,6 +6,7 @@ This plugin can be used with any Android application (e.g. Kotlin, Java).
 
 1. **makePayment**: create and send payment request
 2. **getToken**: to get shurjoPay authorization token for future use
+3. **paymentStatus**: to check payment status by order id
 
 Also reduces many of the things that you had to do manually:
 
@@ -30,7 +31,7 @@ android {
         ...
     }
 ```
-```compileSdk 33``` and ```targetSdk 33``` required api 33
+```compileSdk 33``` and ```targetSdk 33``` required api 33 (Android Tiramisu)
 
 To get a Git project into your build:
 
@@ -50,7 +51,7 @@ Add it in your root build.gradle at the end of repositories:
 ```gradel
 	dependencies {
 		...
-	        implementation 'com.github.filelucker:test-plugin:v1.2.1'     // TODO: Need to change this
+	        implementation 'com.github.filelucker:test-plugin:v1.2.2'     // TODO: Need to change this
 		...
 	}
   ```
@@ -77,29 +78,18 @@ Add it in your root build.gradle at the end of repositories:
 
 ```kotlin
 // TODO request data model setup
-val data = ShurjopayRequestModel(
-    prefix,
-    currency,
-    amount,
-    orderId,
-    discountAmount,
-    discPercent,
-    customerName,
-    customerPhone,
-    customerEmail,
-    customerAddress,
-    customerCity,
-    customerState,
-    customerPostcode,
-    customerCountry,
-    returnUrl,
-    cancelUrl,
-    clientIp,
-    value1,
-    value2,
-    value3,
-    value4
-)
+        val data = PaymentReq(
+            prefix,
+            amount,
+            orderId,
+            currency,
+            customerName,
+            customerAddress,
+            customerPhone,
+            customerCity,
+	    customerPostcode,
+            customerEmail,
+        )
 ```
 
 # Payment Request Setup:
@@ -129,6 +119,7 @@ val data = ShurjopayRequestModel(
 
 # References
 
+1. [Android example application](https://github.com/shurjopay-plugins/sp-plugin-usage-examples/tree/dev/android-app-plugin) showing usage of the library.
 1. [Sample applications and projects](https://github.com/shurjopay-plugins/sp-plugin-usage-examples) in many different languages and frameworks showing 
 2. [shurjopay Plugins](https://github.com/shurjopay-plugins) home page on github
 

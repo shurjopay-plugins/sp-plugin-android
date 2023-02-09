@@ -13,20 +13,20 @@ interface ApiInterface {
 
   //////////////////// POST ///////////////////
 
-  @POST("get_token")
+  @POST("/api/get_token")
   fun getToken(
     @Body token: AuthenticationRequest
   ): Call<AuthenticationResponse>
 
-  @POST("secret-pay")
+  @POST("/api/secret-pay")
   fun checkout(
     @Header("Authorization") token: String,
     @Body checkoutRequest: CheckoutRequest
   ): Call<CheckoutResponse>
 
-  @POST("verification")
+  @POST("/api/verification")
   fun verify(
     @Header("Authorization") token: String,
     @Body verifyRequest: VerifyRequest
-  ): Call<List<VerifyResponse>>
+  ): Call<VerifyResponse>
 }

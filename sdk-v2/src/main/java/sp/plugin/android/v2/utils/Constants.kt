@@ -14,6 +14,7 @@ import androidx.annotation.Keep
     const val PAYMENT_SUCCESSFUL = "Payment successfully done"
     const val PLEASE_CHECK_YOUR_PAYMENT = "Please Check Your Payment"
     const val BANK_TRANSACTION_FAILED = "Bank transaction failed!"
+    const val SERVER_ERROR = "Internal Server Error"
     const val NO_INTERNET_PERMISSION = "No internet permission is given!"
     const val NO_NETWORK_STATE_PERMISSION = "No network state permission is given!"
     const val NO_INTERNET_MESSAGE = "No internet connection! Please check your connection settings."

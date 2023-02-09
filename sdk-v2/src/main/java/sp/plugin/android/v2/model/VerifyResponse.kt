@@ -22,6 +22,8 @@ data class VerifyResponse(
     var customer_order_id: String?,
     var sp_code: Int?,
     var sp_massage: String?,
+    var sp_message: String?,
+    var message: String?,
     var name: String?,
     var email: String?,
     var address: String?,

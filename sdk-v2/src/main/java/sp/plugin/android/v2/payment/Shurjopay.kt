@@ -6,7 +6,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import sp.plugin.android.v2.model.ShurjopayConfigs
 import sp.plugin.android.v2.model.ShurjopayException
-import sp.plugin.android.v2.model.ShurjopayRequestModel
+import sp.plugin.android.v2.model.PaymentReq
 import sp.plugin.android.v2.utils.Constants
 import sp.plugin.android.v2.utils.NetworkManager.isInternetAvailable
 
@@ -20,7 +20,7 @@ class Shurjopay constructor(configs: ShurjopayConfigs) {
     @RequiresApi(Build.VERSION_CODES.M)
     fun makePayment(
         context: Context,
-        data: ShurjopayRequestModel?,
+        data: PaymentReq?,
         resultListener: PaymentResultListener?
     ) {
 

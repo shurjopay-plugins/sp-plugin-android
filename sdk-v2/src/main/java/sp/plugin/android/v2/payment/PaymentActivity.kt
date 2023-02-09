@@ -3,6 +3,7 @@ package sp.plugin.android.v2.payment
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.text.format.Formatter
 import android.view.View
 import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
@@ -19,6 +20,7 @@ import sp.plugin.android.v2.networking.ApiInterface
 import sp.plugin.android.v2.payment.Shurjopay.Companion.listener
 import sp.plugin.android.v2.utils.Constants
 import sp.plugin.android.v2.utils.IndeterminateProgressDialog
+import sp.plugin.android.v2.utils.NetworkManager
 
 /**
  * Created by @author Moniruzzaman on 10/1/23. github: filelucker
@@ -32,7 +34,7 @@ class PaymentActivity : AppCompatActivity() {
     private lateinit var sdkType: String
     private lateinit var username: String
     private lateinit var password: String
-    private lateinit var data: ShurjopayRequestModel
+    private lateinit var data: PaymentReq
     private lateinit var config: ShurjopayConfigs
     private var tokenResponse: AuthenticationResponse? = null
     private var checkoutRequest: CheckoutRequest? = null
@@ -50,7 +52,7 @@ class PaymentActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         if (Build.VERSION.SDK_INT >= 33) {
-            data = intent.getParcelableExtra(Constants.DATA, ShurjopayRequestModel::class.java)!!
+            data = intent.getParcelableExtra(Constants.DATA, PaymentReq::class.java)!!
             config = intent.getParcelableExtra(Constants.CONFIGS, ShurjopayConfigs::class.java)!!
         } else {
             data = intent.getParcelableExtra(Constants.DATA)!!
@@ -161,8 +163,8 @@ class PaymentActivity : AppCompatActivity() {
         binding.webView.loadUrl(checkoutResponse?.checkout_url.toString())
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                binding.webView.setVisibility(View.GONE);
-                if (url.contains(data.cancelUrl.toString())) {
+//                binding.webView.setVisibility(View.GONE);
+                if (url.contains(checkoutRequest?.cancel_url.toString())) {
                     hideProgress()
                     listener?.onFailed(
                         ShurjopayException(
@@ -170,22 +172,13 @@ class PaymentActivity : AppCompatActivity() {
                             Constants.PAYMENT_CANCELLED,
                         )
                     )
+                    finish()
                 }
 
-//                if (url.contains(data.returnUrl.toString())) {
-//                    hideProgress()
-//                    listener?.onFailed(
-//                        ShurjopayException(
-//                            Constants.ResponseType.PAYMENT_CANCEL, null,
-//                            Constants.PAYMENT_CANCELLED_BY_USER,
-//                        )
-//                    )
-//                }
-
-                if (url.contains(data.returnUrl.toString()) && url.contains("order_id")) {
+                if (url.contains(checkoutRequest?.return_url.toString()) && url.contains("order_id")) {
                     verifyPayment()
                 }
-                finish()
+
                 return false
             }
 
@@ -205,27 +198,26 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     private fun verifyPayment() {
-        showProgress()
 
         val transactionInfo = VerifyRequest(checkoutResponse!!.sp_order_id)
 
         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
             tokenResponse?.token_type + " " + tokenResponse?.token,
             transactionInfo
-        )?.enqueue(object : Callback<List<VerifyResponse>> {
+        )?.enqueue(object : Callback<VerifyResponse> {
             override fun onResponse(
-                call: Call<List<VerifyResponse>>,
-                response: Response<List<VerifyResponse>>
+                call: Call<VerifyResponse>,
+                response: Response<VerifyResponse>
             ) {
 
                 if (response.isSuccessful) {
                     hideProgress()
-                    if (response.body()?.get(0)?.sp_code == 1000) {
+                    if (response.body()?.sp_code == 1000) {
 
                         listener?.onSuccess(
                             ShurjopaySuccess(
                                 Constants.ResponseType.SUCCESS,
-                                response.body()!!.get(0),
+                                response.body()!!,
                                 Constants.PAYMENT_SUCCESSFUL, null, null
                             )
                         )
@@ -238,11 +230,20 @@ class PaymentActivity : AppCompatActivity() {
                             )
                         )
                     }
-                    finish()
+
                 }
+                else{
+                    listener?.onFailed(
+                        ShurjopayException(
+                            Constants.ResponseType.PAYMENT_CANCEL, null,
+                            Constants.SERVER_ERROR,
+                        )
+                    )
+                }
+                finish()
             }
 
-            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
+            override fun onFailure(call: Call<VerifyResponse>, t: Throwable) {
                 hideProgress()
                 listener?.onFailed(
                     ShurjopayException(
@@ -272,19 +273,19 @@ class PaymentActivity : AppCompatActivity() {
                         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
                             response.body()?.token_type + " " + response.body()?.token,
                             transactionInfo
-                        )?.enqueue(object : Callback<List<VerifyResponse>> {
+                        )?.enqueue(object : Callback<VerifyResponse> {
                             override fun onResponse(
-                                call: Call<List<VerifyResponse>>,
-                                response: Response<List<VerifyResponse>>
+                                call2: Call<VerifyResponse>,
+                                response2: Response<VerifyResponse>
                             ) {
 
-                                if (response.isSuccessful) {
-                                    if (response.body()?.get(0)?.sp_code == 1000) {
+                                if (response2.isSuccessful) {
+                                    if (response2.body()?.sp_code == 1000) {
 
                                         listener?.onSuccess(
                                             ShurjopaySuccess(
                                                 Constants.ResponseType.SUCCESS,
-                                                response.body()!!.get(0),
+                                                response2.body()!!,
                                                 Constants.PAYMENT_SUCCESSFUL, null, null
                                             )
                                         )
@@ -292,8 +293,8 @@ class PaymentActivity : AppCompatActivity() {
                                     } else {
                                         listener?.onFailed(
                                             ShurjopayException(
-                                                Constants.ResponseType.PAYMENT_CANCEL, null,
-                                                Constants.PAYMENT_CANCELLED_BY_USER,
+                                                Constants.ResponseType.ERROR, null,
+                                                response2.body()?.message,
                                             )
                                         )
                                     }
@@ -301,14 +302,14 @@ class PaymentActivity : AppCompatActivity() {
                                 } else {
                                     listener?.onFailed(
                                         ShurjopayException(
-                                            Constants.ResponseType.HTTP_ERROR, null,
-                                            Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                                            Constants.ResponseType.ERROR, null,
+                                            response2.body()?.message,
                                         )
                                     )
                                 }
                             }
 
-                            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
+                            override fun onFailure(call: Call<VerifyResponse>, t: Throwable) {
 
                                 listener?.onFailed(
                                     ShurjopayException(
@@ -326,7 +327,7 @@ class PaymentActivity : AppCompatActivity() {
                         listener?.onFailed(
                             ShurjopayException(
                                 Constants.ResponseType.HTTP_ERROR, null,
-                                Constants.PLEASE_CHECK_YOUR_PAYMENT,
+                                response.message(),
                             )
                         )
                     }
@@ -374,32 +375,33 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun onExecuteUrlDataBuilder(
         tokenResponse: AuthenticationResponse?,
-        data: ShurjopayRequestModel
+        data: PaymentReq
     ): CheckoutRequest {
         return CheckoutRequest(
             tokenResponse?.token.toString(),
             tokenResponse?.store_id!!,
             data.prefix,
             data.currency,
-            data.returnUrl,
-            data.cancelUrl,
+            sdkType+"/response",
+            sdkType+"/response",
             data.amount,
             data.orderId,
-            data.discountAmount,
-            data.discPercent,
-            data.clientIp,
+            0.0,
+            0.0,
+            "127.0.0.1",
+//            NetworkManager.getLocalIpAddress(),
             data.customerName,
             data.customerPhone,
             data.customerEmail,
             data.customerAddress,
             data.customerCity,
-            data.customerState,
+            "",
             data.customerPostcode,
-            data.customerCountry,
-            data.value1,
-            data.value2,
-            data.value3,
-            data.value4
+            "",
+            "",
+            "",
+            "",
+            ""
         )
     }
 

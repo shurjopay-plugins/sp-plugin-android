@@ -79,7 +79,7 @@ class Shurjopay constructor(configs: ShurjopayConfigs) {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    fun verifyPayment(
+    fun paymentStatus(
         context: Context,
         spOrderId: String,
         resultListener: PaymentResultListener?

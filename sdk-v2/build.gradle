@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace "sp.plugin.android.v2"
+    namespace "bd.com.shurjomukhi.v2"
     compileSdk 33
 
     defaultConfig {

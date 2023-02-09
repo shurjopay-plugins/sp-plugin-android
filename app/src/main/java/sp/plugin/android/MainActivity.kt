@@ -23,13 +23,13 @@ class MainActivity : AppCompatActivity() {
 
     var shurjopay: Shurjopay? = null
 
-     val SP_USER = "sp_sandbox"
-     val SP_PASS = "pyyk97hu&6u6"
-     val SHURJOPAY_API = "https://sandbox.shurjopayment.com"
+//     val SP_USER = "sp_sandbox"
+//     val SP_PASS = "pyyk97hu&6u6"
+//     val SHURJOPAY_API = "https://sandbox.shurjopayment.com"
 
-//    val SP_USER = "shurjopay"
-//    val SP_PASS = "pyyk97hu&6u625"
-//    val SHURJOPAY_API = "https://www.dev.engine.shurjopayment.com"
+    val SP_USER = "shurjopay"
+    val SP_PASS = "pyyk97hu&6u625"
+    val SHURJOPAY_API = "https://www.dev.engine.shurjopayment.com"
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         )
 
 
-//        pay()
-        checkStatus("sp63e4a0e84636b")
+        pay()
+//        checkStatus("sp63e4cbf38abab")
 
     }
 
@@ -56,14 +56,14 @@ class MainActivity : AppCompatActivity() {
 
         val data = PaymentReq(
             "sp",
-            10.0,
+            1.00,
             "NOK" + Random().nextInt(1000000),
             "BDT",
-            "Dummy",
+            "moniruzzaman",
             "Dhaka",
             "01721915013",
             "Dhaka", "1200",
-            "dummy@gmail.com",
+            "m.zaman000@gmail.com",
         )
 
         shurjopay?.makePayment(

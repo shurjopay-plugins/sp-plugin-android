@@ -2,9 +2,11 @@ package sp.plugin.android.v2.networking
 
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import sp.plugin.android.v2.model.*
+
 
 /**
  * Created by @author Moniruzzaman on 22/1/23. github: filelucker
@@ -28,5 +30,6 @@ interface ApiInterface {
   fun verify(
     @Header("Authorization") token: String,
     @Body verifyRequest: VerifyRequest
-  ): Call<VerifyResponse>
+  ): Call<List<VerifyResponse>>
+
 }

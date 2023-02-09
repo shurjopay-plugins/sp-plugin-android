@@ -10,6 +10,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -164,7 +165,13 @@ class PaymentActivity : AppCompatActivity() {
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
 //                binding.webView.setVisibility(View.GONE);
-                if (url.contains(checkoutRequest?.cancel_url.toString())) {
+
+
+                if (url.contains(checkoutRequest?.return_url.toString()) && url.contains("order_id")) {
+                    verifyPayment()
+                }
+
+                if (url.contains(checkoutRequest?.cancel_url.toString()) &&  !url.contains("order_id")) {
                     hideProgress()
                     listener?.onFailed(
                         ShurjopayException(
@@ -174,11 +181,6 @@ class PaymentActivity : AppCompatActivity() {
                     )
                     finish()
                 }
-
-                if (url.contains(checkoutRequest?.return_url.toString()) && url.contains("order_id")) {
-                    verifyPayment()
-                }
-
                 return false
             }
 
@@ -204,20 +206,20 @@ class PaymentActivity : AppCompatActivity() {
         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
             tokenResponse?.token_type + " " + tokenResponse?.token,
             transactionInfo
-        )?.enqueue(object : Callback<VerifyResponse> {
+        )?.enqueue(object : Callback<List<VerifyResponse>> {
             override fun onResponse(
-                call: Call<VerifyResponse>,
-                response: Response<VerifyResponse>
+                call: Call<List<VerifyResponse>>,
+                response: Response<List<VerifyResponse>>
             ) {
 
                 if (response.isSuccessful) {
                     hideProgress()
-                    if (response.body()?.sp_code == 1000) {
+                    if (response.body()?.get(0)?.sp_code == 1000) {
 
                         listener?.onSuccess(
                             ShurjopaySuccess(
                                 Constants.ResponseType.SUCCESS,
-                                response.body()!!,
+                                response.body()!!.get(0),
                                 Constants.PAYMENT_SUCCESSFUL, null, null
                             )
                         )
@@ -243,7 +245,7 @@ class PaymentActivity : AppCompatActivity() {
                 finish()
             }
 
-            override fun onFailure(call: Call<VerifyResponse>, t: Throwable) {
+            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
                 hideProgress()
                 listener?.onFailed(
                     ShurjopayException(
@@ -273,19 +275,19 @@ class PaymentActivity : AppCompatActivity() {
                         ApiClient().getApiClient(sdkType)?.create(ApiInterface::class.java)?.verify(
                             response.body()?.token_type + " " + response.body()?.token,
                             transactionInfo
-                        )?.enqueue(object : Callback<VerifyResponse> {
+                        )?.enqueue(object : Callback<List<VerifyResponse>> {
                             override fun onResponse(
-                                call2: Call<VerifyResponse>,
-                                response2: Response<VerifyResponse>
+                                call2: Call<List<VerifyResponse>>,
+                                response2: Response<List<VerifyResponse>>
                             ) {
 
                                 if (response2.isSuccessful) {
-                                    if (response2.body()?.sp_code == 1000) {
+                                    if (response2.body()?.get(0)?.sp_code == 1000) {
 
                                         listener?.onSuccess(
                                             ShurjopaySuccess(
                                                 Constants.ResponseType.SUCCESS,
-                                                response2.body()!!,
+                                                response2.body()!!.get(0),
                                                 Constants.PAYMENT_SUCCESSFUL, null, null
                                             )
                                         )
@@ -294,7 +296,7 @@ class PaymentActivity : AppCompatActivity() {
                                         listener?.onFailed(
                                             ShurjopayException(
                                                 Constants.ResponseType.ERROR, null,
-                                                response2.body()?.message,
+                                                response2.body()?.get(0)?.message,
                                             )
                                         )
                                     }
@@ -303,13 +305,13 @@ class PaymentActivity : AppCompatActivity() {
                                     listener?.onFailed(
                                         ShurjopayException(
                                             Constants.ResponseType.ERROR, null,
-                                            response2.body()?.message,
+                                            Constants.PLEASE_CHECK_YOUR_PAYMENT,
                                         )
                                     )
                                 }
                             }
 
-                            override fun onFailure(call: Call<VerifyResponse>, t: Throwable) {
+                            override fun onFailure(call: Call<List<VerifyResponse>>, t: Throwable) {
 
                                 listener?.onFailed(
                                     ShurjopayException(
@@ -406,3 +408,4 @@ class PaymentActivity : AppCompatActivity() {
     }
 
 }
+

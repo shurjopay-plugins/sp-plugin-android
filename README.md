@@ -4,8 +4,8 @@ Official shurjoPay Android plugin for merchants or service providers to connect 
 
 This plugin can be used with any Android application (e.g. Kotlin, Java).
 
-1. **makePayment**: create and send payment request
-2. **getToken**: to get shurjoPay authorization token for future use
+1. **getToken**: to get shurjoPay authorization token for future use
+2. **makePayment**: create and send payment request
 3. **verifyPayment**: to check payment status by order id
 
 Also reduces many of the things that you had to do manually:

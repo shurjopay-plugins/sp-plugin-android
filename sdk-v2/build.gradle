@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    namespace "bd.com.shurjomukhi.v2"
     compileSdk 33
 
     defaultConfig {
@@ -17,7 +18,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             consumerProguardFiles "consumer-rules.pro"
         }
@@ -35,7 +36,7 @@ android {
     buildFeatures {
         viewBinding true
     }
-    namespace "com.shurjopay.sdk.v2"
+
 }
 
 dependencies {
@@ -46,6 +47,7 @@ dependencies {
     // Material Design
     implementation "com.google.android.material:material:1.6.1"
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation 'com.google.android.gms:play-services-basement:18.1.0'
 
     // Testing
     testImplementation "junit:junit:4.13.2"

@@ -6,7 +6,7 @@
 
   <application>
     <activity
-        android:name=".payment.PaymentActivity"
+        android:name="bd.com.shurjomukhi.v2.payment.PaymentActivity"
         android:exported="true" />
   </application>
 

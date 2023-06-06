@@ -51,7 +51,7 @@ Add it in your root build.gradle at the end of repositories:
 ```gradel
 	dependencies {
 		...
-	        implementation 'com.github.filelucker:test-plugin:v1.2.2'     // TODO: Need to change this
+	        implementation "com.github.shurjopay-plugins:sp-plugin-android:2.2.1"
 		...
 	}
   ```
@@ -119,7 +119,7 @@ Add it in your root build.gradle at the end of repositories:
 
 # References
 
-1. [Android example application](https://github.com/shurjopay-plugins/sp-plugin-usage-examples/tree/dev/android-app-plugin) showing usage of the library.
+1. [Android example application](https://github.com/shurjopay-plugins/sp-plugin-usage-examples/tree/main/android-app-plugin) showing usage of the library.
 1. [Sample applications and projects](https://github.com/shurjopay-plugins/sp-plugin-usage-examples) in many different languages and frameworks showing 
 2. [shurjopay Plugins](https://github.com/shurjopay-plugins) home page on github
 
